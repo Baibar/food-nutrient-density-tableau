@@ -31,7 +31,7 @@ from statsmodels.stats.multitest import multipletests
 # ==============================================================================
 
 # Path to raw JSON data file
-file_path = '/content/drive/MyDrive/2/FoodData_Central_sr_legacy_food_json_2018-04.json'
+file_path = '/FoodData_Central_sr_legacy_food_json_2018-04.json'
 
 with open(file_path, 'r', encoding='utf-8') as f:
     raw_data = json.load(f)
@@ -240,29 +240,7 @@ df_engineered['protein_cal_pct'] = ((df_engineered['protein_g'] * 4) / calories_
 df_engineered['fat_cal_pct'] = ((df_engineered['fat_g'] * 9) / calories_safe * 100).fillna(0).clip(0, 100).round(1)
 df_engineered['carb_cal_pct'] = ((df_engineered['carbs_g'] * 4) / calories_safe * 100).fillna(0).clip(0, 100).round(1)
 
-# 2. Nutrient Density Index (NDI) per 100 kcal with 200% Daily Value capping
-protein_capped = df_engineered['protein_g'].clip(upper=100)
-fiber_capped = df_engineered['fiber_g'].clip(upper=56)
-iron_capped = df_engineered['iron_mg'].clip(upper=36)
-calcium_capped = df_engineered['calcium_mg'].clip(upper=2000)
-vit_c_capped = df_engineered['vitamin_c_mg'].clip(upper=180)
-
-df_engineered['nutrient_density_score'] = (
-    (protein_capped * 2 + fiber_capped * 5 + iron_capped * 2 + calcium_capped * 0.1 + vit_c_capped * 0.5)
-    / calories_safe * 100
-).fillna(0).round(2)
-
-# Exclude non-food technical ingredients & low-calorie beverages from NDI scoring
-non_food_keywords = ['leavening', 'baking powder', 'spices', 'seasoning', 'flavoring', 'yeast', 'extract']
-ingredient_pattern = '|'.join(non_food_keywords)
-df_engineered['is_ingredient'] = df_engineered['description'].str.contains(ingredient_pattern, case=False, na=False)
-
-df_engineered.loc[
-    df_engineered['is_ingredient'] | (df_engineered['calories_kcal'] < 25), 
-    'nutrient_density_score'
-] = 0
-
-# 3. Dietary & Nutrition Binary Flags
+# 2. Dietary & Nutrition Binary Flags
 df_engineered['is_high_protein'] = (df_engineered['protein_cal_pct'] >= 25) | (df_engineered['protein_g'] >= 15)
 df_engineered['is_keto_friendly'] = (df_engineered['carb_cal_pct'] <= 10) & (df_engineered['fat_cal_pct'] >= 65)
 df_engineered['is_low_calorie'] = df_engineered['calories_kcal'] <= 100
