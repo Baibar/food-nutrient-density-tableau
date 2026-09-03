@@ -2,7 +2,7 @@
 
 An interactive Tableau dashboard that provides an objective, data-driven assessment of food products based on their nutrient composition. The project transforms USDA long-format data into a flexible scoring system using percentile ranking, conditional inversion for limit nutrients, and dynamic table calculations.
 
-🔗 **[View Interactive Dashboard on Tableau Public](#)** *(Вставити лінк на Tableau Public)*
+🔗 **[View Interactive Dashboard on Tableau Public](#)**
 
 ---
 
